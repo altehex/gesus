@@ -12,11 +12,13 @@
 
 #include <QAction>
 #include <QApplication>
+#include <QKeySequence>
 #include <QMainWindow>
 #include <QMenu>
 #include <QObject>
 #include <QPoint>
 #include <QShortcut>
+#include <Qt>
 #include <QTabWidget>
 
 
@@ -30,7 +32,9 @@ public: // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 private slots: // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-	void slot_menu_opened(QMenu *, const QPoint &);
+	void slot_close_selected_tab(int);
+	void slot_select_adjacent_tab(const QKeySequence &);
+	void slot_toggle_fullscreen(void);
 	
 private: // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -47,8 +51,9 @@ private: // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 	/*  Initialization functions
 	 */
+	void create_missing_dirs(void);
 	void setup_editor_tabs(void);
-	void setup_file_actions();
+	void setup_file_actions(void);
 	void setup_main_window(void);
 	void setup_menus(void);
 	void setup_shortcuts(void);
@@ -58,11 +63,16 @@ private: // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #define FILE_MENU_TITLE  "File"
 	QMenu gesusFileMenu;
 
-	QAction showAbout       = QAction("About", this);
-	QAction exitApplication = QAction("Exit", this);
+	QAction actShowAbout       = QAction("About", this);
+	QAction actExitApplication = QAction("Exit",  this);
 	
 	/*  Shortcuts
 	 */
-	// QShortcut exitApplicationSC;
+	QShortcut scCloseTab        = QShortcut(Qt::CTRL | Qt::Key_W,      this);
+	QShortcut scExitApplication = QShortcut(Qt::CTRL | Qt::Key_Q,      this);
+	QShortcut scFileMenu        = QShortcut(Qt::CTRL | Qt::Key_F,      this);
+	QShortcut scFullscreen      = QShortcut(Qt::Key_F11,               this);
+	QShortcut scLeftTab         = QShortcut(Qt::SHIFT | Qt::Key_Left,  this);
+	QShortcut scRightTab        = QShortcut(Qt::SHIFT | Qt::Key_Right, this);
 	
 }; // class GesusMainWindow

@@ -9,6 +9,7 @@
 #include <QStyle>
 #include <QStyleOption>
 #include <QStyleOptionTab>
+#include <Qt>
 #include <QtGui>
 #include <QTabBar>
 
@@ -61,6 +62,60 @@ drawControl(      QStyle::ControlElement controlElement,
 
 
 void GesusStyle::
+gesus_ce_menu_bar_empty_area(const QStyleOption * styleOption,
+					               QPainter *     painter,
+					         const QWidget *      widget)
+{
+	painter->fillRect(styleOption->rect, GesusTheme::OUTER_BG_COLOR);
+}
+
+
+void GesusStyle::
+gesus_ce_menu_item(const QStyleOption * styleOption,
+				         QPainter *     painter,
+				   const QWidget *      widget)
+{
+	using namespace GesusMetrics;
+	
+	const QStyleOptionMenuItem * menuItemOption = qstyleoption_cast<const QStyleOptionMenuItem *>(styleOption);
+	
+	int    itemTextFlags;
+	QRect  itemTextRect;
+	QColor itemTextColor, itemBaseColor;
+
+	bool isSelected;
+
+	itemTextFlags = Qt::AlignLeft        |
+		            Qt::AlignTop         |
+		            Qt::TextShowMnemonic |
+                    Qt::TextDontClip     |
+		            Qt::TextSingleLine;
+	itemTextRect  = menuItemOption->rect.adjusted(TEXT_MARGIN_DEFAULT_H + MENU_ITEM_MARGIN_H,
+												  TEXT_MARGIN_DEFAULT_V + MENU_ITEM_MARGIN_V,
+												  -TEXT_MARGIN_DEFAULT_H - MENU_ITEM_MARGIN_H,
+												  -TEXT_MARGIN_DEFAULT_V - MENU_ITEM_MARGIN_V);
+
+	isSelected = menuItemOption->state & State_Selected;
+
+	if (!isSelected) [[likely]] {
+		itemBaseColor = GesusTheme::OUTER_BG_COLOR;
+		itemTextColor = GesusTheme::TEXT_COLOR;
+	}
+	else {
+		itemBaseColor = GesusTheme::INNER_BG_COLOR;
+		itemTextColor = GesusTheme::TEXT_HIGHLIGHT_COLOR;
+	}
+
+	painter->fillRect(menuItemOption->rect, itemBaseColor);
+	
+	painter->setPen  (QPen(itemTextColor));
+	painter->setFont (GesusTheme::DEFAULT_FONT);
+	
+	painter->drawText(itemTextRect, itemTextFlags, menuItemOption->text);
+}
+
+
+void GesusStyle::
 gesus_ce_tab_bar_shape(const QStyleOption * styleOption,
 					         QPainter *     painter,
 					   const QWidget *      widget)
@@ -93,19 +148,10 @@ gesus_ce_tab_bar_shape(const QStyleOption * styleOption,
 
 
 void GesusStyle::
-gesus_ce_menu_bar_empty_area(const QStyleOption * styleOption,
-					               QPainter *     painter,
-					         const QWidget *      widget)
-{
-	painter->fillRect(styleOption->rect, GesusTheme::OUTER_BG_COLOR);
-}
-
-
-void GesusStyle::
-drawPrimitive(      QStyle::PrimitiveElement primitiveElement,
-			  const QStyleOption *           styleOption,
-			        QPainter *               painter,
-			  const QWidget *                widget) const
+drawPrimitive(      QStyle::PrimitiveElement  primitiveElement,
+			  const QStyleOption *            styleOption,
+			        QPainter *                painter,
+			  const QWidget *                 widget) const
 {
 	DrawFunction draw_function = customDrawPrimitiveFunctions[primitiveElement];
 		
@@ -118,29 +164,38 @@ drawPrimitive(      QStyle::PrimitiveElement primitiveElement,
 
 //  0. Generic frame
 void GesusStyle::
-gesus_pe_frame(const QStyleOption * styleOption,
-			         QPainter *     painter,
-			   const QWidget *      widget)
+gesus_pe_frame(const QStyleOption *  styleOption,
+			         QPainter *      painter,
+			   const QWidget *       widget)
 {
-	Draw::draw_outline_skewed(painter,
-						        styleOption->rect);
+	Draw::draw_outline_skewed(painter, styleOption->rect);
+}
+
+
+//  0. Generic frame
+void GesusStyle::
+gesus_pe_frame_not_skewed(const QStyleOption *  styleOption,
+			                    QPainter *      painter,
+			              const QWidget *       widget)
+{
+	Draw::draw_outline(painter, styleOption->rect);
 }
 
 
 //  3. Generic focus indicator
 void GesusStyle::
-gesus_pe_frame_focus_rect(const QStyleOption * styleOption,
-								QPainter *     painter,
-						  const QWidget *      widget)
+gesus_pe_frame_focus_rect(const QStyleOption *  styleOption,
+								QPainter *      painter,
+						  const QWidget *       widget)
 {
 	/* Draw nothing */
 }
 
 
 void GesusStyle::
-gesus_pe_panel_menu_bar(const QStyleOption * styleOption,
-					    	  QPainter *     painter,
-    					const QWidget *      widget)
+gesus_pe_panel_menu_bar(const QStyleOption *  styleOption,
+					    	  QPainter *      painter,
+    					const QWidget *       widget)
 {
 	QRect panelRect = styleOption->rect.adjusted(1, 1, -1, -1);
 	painter->fillRect(panelRect, GesusTheme::OUTER_BG_COLOR);
@@ -167,14 +222,13 @@ gesus_ct_menu_bar_item(const QStyleOption * styleOption,
 				       const QSize &        contentsSize,
 				       const QWidget *      widget)
 {
-	const int minWidth = QFontMetrics(GesusTheme::DEFAULT_FONT).height() * 2;
-	
 	int width, height;
 	int fontHeight;
 	
 	fontHeight = styleOption->fontMetrics.height();
 	
-	width  = qMax(contentsSize.width() + 2 * GesusMetrics::MENU_BAR_ITEM_MARGIN_H, minWidth);
+	width  = qMax(contentsSize.width() + 2 * GesusMetrics::MENU_BAR_ITEM_MARGIN_H,
+				  fontHeight * 2);
 	height = fontHeight + 2 * GesusMetrics::MENU_BAR_ITEM_MARGIN_V;
 	
 	return QSize(width, height);

@@ -36,6 +36,23 @@ namespace GesusTheme { // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 }; // namespace GesusTheme >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
+namespace GesusMetrics { // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+	const int MENU_BAR_ITEM_MARGIN_H  = 2;
+	const int MENU_BAR_ITEM_MARGIN_V  = 2;
+	
+	const int MENU_ITEM_MARGIN_H  = 2;
+	const int MENU_ITEM_MARGIN_V  = 1;
+	
+	const int TAB_BAR_TAB_MARGIN_H = 2;
+	const int TAB_BAR_TAB_MARGIN_V = 2;
+	
+	const int TEXT_MARGIN_DEFAULT_H = 2;
+	const int TEXT_MARGIN_DEFAULT_V = 2;
+	
+}; // namespace GesusMetrics >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
 class GesusStyle : public QCommonStyle
 {
 	Q_OBJECT
@@ -96,20 +113,24 @@ private: // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	typedef function<QSize(SIZE_SIGNATURE)> SizeFunction;
 
 	static void gesus_ce_menu_bar_empty_area(DRAW_SIGNATURE);
+	static void gesus_ce_menu_item(DRAW_SIGNATURE);
 	static void gesus_ce_tab_bar_shape(DRAW_SIGNATURE);
 	
 	array<DrawFunction, QSTYLE_CE_MAX> customDrawControlFunctions = []() {
 		array<DrawFunction, QSTYLE_CE_MAX> a{};
+		
+		a[QStyle::CE_MenuBarEmptyArea] = gesus_ce_menu_bar_empty_area;
+
+		a[QStyle::CE_MenuItem] = gesus_ce_menu_item;
 
 		a[QStyle::CE_TabBarTabShape] = gesus_ce_tab_bar_shape;
-
-		a[QStyle::CE_MenuBarEmptyArea] = gesus_ce_menu_bar_empty_area;
 		
 		return a;
 	}();
 
 	static void gesus_pe_frame(DRAW_SIGNATURE);
 	static void gesus_pe_frame_focus_rect(DRAW_SIGNATURE);
+	static void gesus_pe_frame_not_skewed(DRAW_SIGNATURE);
 	static void gesus_pe_panel_menu_bar(DRAW_SIGNATURE);
 	
 	array<DrawFunction, QSTYLE_PE_MAX> customDrawPrimitiveFunctions = []() {
@@ -119,6 +140,8 @@ private: // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 		
 		a[QStyle::PE_FrameFocusRect] = gesus_pe_frame_focus_rect;
 
+		a[QStyle::PE_FrameMenu] = gesus_pe_frame_not_skewed;
+		
 		a[QStyle::PE_PanelMenuBar] = gesus_pe_panel_menu_bar;
 		
 		return a;
@@ -152,17 +175,3 @@ private: // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 		return a;
 	}();
 };
-
-
-namespace GesusMetrics { // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-	const int MENU_BAR_ITEM_MARGIN_H  = 2;
-	const int MENU_BAR_ITEM_MARGIN_V  = 2;
-	
-	const int TAB_BAR_TAB_MARGIN_H = 2;
-	const int TAB_BAR_TAB_MARGIN_V = 2;
-	
-	const int TEXT_MARGIN_DEFAULT_H = 2;
-	const int TEXT_MARGIN_DEFAULT_V = 2;
-	
-}; // namespace GesusMetrics >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>

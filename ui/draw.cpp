@@ -9,15 +9,16 @@
 
 
 void Draw::
-draw_outline(      QPainter * painter,
-			 const QRect      rect,
-			 const QColor     color)
+draw_outline(      QPainter *  painter,
+			 const QRect &     rect,
+			 const QColor &    color)
 {
 	int x, y, w, h;
 
 	rect.getRect(&x, &y, &w, &h);
-
-	painter->setBrush(color);
+	w -= 1;  h -= 1;
+	
+	painter->setPen(color);
 	
 	painter->drawLine(x,     y,     x + w, y    ); // Top
 	painter->drawLine(x,     y + h, x + w, y + h); // Bottom
@@ -27,10 +28,10 @@ draw_outline(      QPainter * painter,
 
 
 void Draw::
-draw_outline_thick(      QPainter * painter,
-				   const QRect      rect,
-				   const int        thickness,
-				   const QColor     color)
+draw_outline_thick(      QPainter *  painter,
+				   const QRect &     rect,
+				   const int         thickness,
+				   const QColor &    color)
 {
 	int x, y, w, h;
 
@@ -49,9 +50,9 @@ draw_outline_thick(      QPainter * painter,
 
 
 void Draw::
-draw_outline_skewed(      QPainter * painter, 
-					const QRect      rect,
-					const QColor     color)
+draw_outline_skewed(      QPainter *  painter, 
+					const QRect &     rect,
+					const QColor &    color)
 {
 	int x, y, w, h;
 
@@ -74,9 +75,9 @@ draw_outline_skewed(      QPainter * painter,
 
 
 void Draw::
-draw_outline_skewed_tab(      QPainter *     painter, 
-						const QRect          rect,
-					    const QColor         color)
+draw_outline_skewed_tab(      QPainter *  painter, 
+						const QRect &     rect,
+					    const QColor &    color)
 {
 	int x, y, w, h;
 	

@@ -1,18 +1,22 @@
 #include "main_window.hpp"
 
 
+#include "about.hpp"
 #include "stash.hpp"
 #include "style.hpp"
 #include "tile_editor.hpp"
 
 #include <QApplication>
+#include <QDir>
 #include <QDockWidget>
 #include <QGridLayout>
 #include <QMenu>
 #include <QMenuBar>
 #include <QPoint>
+#include <QScrollArea>
 #include <QTabBar>
 #include <QTabWidget>
+#include <QWidget>
 
 
 GesusMainWindow::
@@ -20,7 +24,9 @@ GesusMainWindow(int     argc,
 				char *  argv[])
 	: gesusTileEditor(this),
 	  gesusTileStash(this)
-{	
+{
+	create_missing_dirs();
+	
 	setup_editor_tabs();
 	
 	setup_file_actions();
@@ -35,34 +41,52 @@ GesusMainWindow(int     argc,
 void GesusMainWindow::
 setup_main_window()
 {
-	QMenuBar *    gesusMenuBar       = new QMenuBar();
-	QDockWidget * gesusTileStashDock = new QDockWidget(TILE_STASH_DOCK_NAME);
+	QMenuBar *     gesusMenuBar             = new QMenuBar();
+	QScrollArea *  gesusTileStashScrollArea = new QScrollArea(); 
+	QDockWidget *  gesusTileStashDock       = new QDockWidget(TILE_STASH_DOCK_NAME);
 
 	gesusMenuBar->addMenu(&gesusFileMenu);
 	
-	gesusTileStashDock->setPalette  (GesusStyle::palette);
-	gesusTileStashDock->setWidget   (&gesusTileStash);
+	gesusTileStashScrollArea->setWidget(&gesusTileStash);
 	
-	this->addDockWidget(Qt::BottomDockWidgetArea,
+	gesusTileStashDock->setPalette  (GesusStyle::palette);
+	gesusTileStashDock->setWidget   (gesusTileStashScrollArea);
+	
+	addDockWidget(Qt::BottomDockWidgetArea,
 						gesusTileStashDock,
 						Qt::Horizontal);
 	
-	this->setCentralWidget  (gesusEditorTabs    );
-	this->setMenuBar        (gesusMenuBar       );
-	this->setPalette        (GesusStyle::palette);
+	setCentralWidget  (gesusEditorTabs    );
+	setMenuBar        (gesusMenuBar       );
+	setPalette        (GesusStyle::palette);
+}
+
+
+void GesusMainWindow::
+create_missing_dirs()
+{
+	QDir tileDir = gesusTileStash.getTileDir();
+
+	if (!tileDir.exists())
+		tileDir.mkpath(TILE_STASH_DEFAULT_DIR);
 }
 
 
 void GesusMainWindow::
 setup_editor_tabs()
 {
+	QTabBar * gesusTabBar;
+	
 	gesusEditorTabs = new QTabWidget;
 	
 	gesusEditorTabs->setMovable       (true                  );
 	gesusEditorTabs->setTabPosition   (QTabWidget::North     );
-	gesusEditorTabs->setTabsClosable  (true                  );
 	gesusEditorTabs->setTabShape      (QTabWidget::Triangular);
 
+	gesusTabBar = gesusEditorTabs->tabBar();
+
+	gesusTabBar->setTabsClosable(true);
+	
 	// WIP: add icons
 	gesusEditorTabs->addTab(&gesusPlaneEditor,  PLANE_EDITOR_TAB_NAME);
 	gesusEditorTabs->addTab(&gesusSpriteEditor, SPRITE_EDITOR_TAB_NAME);
@@ -73,8 +97,8 @@ setup_editor_tabs()
 void GesusMainWindow::
 setup_file_actions()
 {
-	connect(&exitApplication, &QAction::triggered,  qApp,       &QApplication::quit);
-	connect(&showAbout,       &QAction::triggered, &gesusAbout, &QWidget::show     );
+	connect( &actExitApplication, &QAction::triggered,  qApp,       &QApplication::quit );
+	connect( &actShowAbout,       &QAction::triggered, &gesusAbout, &GesusAbout::show );
 }
 
 
@@ -84,30 +108,21 @@ setup_menus()
 	gesusFileMenu.setTitle    (FILE_MENU_TITLE);
 	gesusFileMenu.setPalette  (GesusStyle::palette);
 	
-	gesusFileMenu.addAction(&showAbout);
-	gesusFileMenu.addAction(&exitApplication);
-
-	// connect();
+	gesusFileMenu.addAction(&actShowAbout);
+	gesusFileMenu.addAction(&actExitApplication);
 }
 
 
 void GesusMainWindow::
 setup_shortcuts()
 {
-	
+	connect( &scCloseTab,        &QShortcut::activated, this,           [this]() { this->slot_close_selected_tab(this->gesusEditorTabs->currentIndex()); } );
+	connect( &scExitApplication, &QShortcut::activated, qApp,           &QApplication::quit                                                                );
+	// connect( &scFileMenu,        &QShortcut::activated, &gesusFileMenu, [this]() { this->gesusFileMenu.popup(); }                                                );
+	connect( &scFullscreen,      &QShortcut::activated, this,           &GesusMainWindow::slot_toggle_fullscreen                                           );
+	connect( &scRightTab,        &QShortcut::activated, this,           [this]() { this->slot_select_adjacent_tab(this->scRightTab.key()); }               );
+	connect( &scLeftTab,         &QShortcut::activated, this,           [this]() { this->slot_select_adjacent_tab(this->scLeftTab.key()); }                );
 }
 
 
-// void GesusMainWindow::
-// slot_about_opened()
-// {
-// 	gesusAbout;
-// }
 
-
-void GesusMainWindow::
-slot_menu_opened(      QMenu *   menu,
-				 const QPoint &  point)
-{
-	menu->popup(point);
-}

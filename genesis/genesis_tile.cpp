@@ -6,7 +6,7 @@
 
 
 Tile::
-Tile(const char * path)
-	: QImage(QString(path))
+Tile(const QString & path)
+	: QImage(path)
 {
 }

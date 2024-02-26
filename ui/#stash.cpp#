@@ -27,6 +27,8 @@ TileStash::
 TileStash(const QWidget * parent)
 {
 	load_tiles_from_directory();
+
+	setup_table();
 	
 	setPalette(GesusStyle::palette);
 }
@@ -52,6 +54,13 @@ load_tiles_from_directory(const QDir & dir)
 		tileItem = new TileItem(tileFile.filePath());
 	    tiles.push_back(tileItem);
 	}
+}
+
+
+void TileStash::
+setup_table()
+{
+	
 }
 
 

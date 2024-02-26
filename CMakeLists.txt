@@ -27,7 +27,6 @@ qt_standard_project_setup()
 
 
 qt_add_executable(gesus
-  MANUAL_FINALIZATION
   gesus.cpp
 )
 
@@ -49,16 +48,15 @@ target_link_options(gesus
 )
 
 target_link_libraries(gesus PRIVATE
+  gesus_genesis
   gesus_ui
+  Qt6::Core
   Qt6::Widgets
 )
 
 
 add_subdirectory(genesis)
 add_subdirectory(ui)
-
-
-qt_finalize_executable(gesus)
 
 
 # WIP ----------------------
