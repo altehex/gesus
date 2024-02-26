@@ -52,7 +52,8 @@ private: // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	list<TileItem *> tiles;
 	
 	void load_tiles_from_directory(const QDir & dir = tileDir);
-													
+	void setup_table(void);
+															  
 private slots: // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 	void slot_receive_from_editor(void);
