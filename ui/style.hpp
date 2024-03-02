@@ -15,17 +15,27 @@ using std::array;
 using std::function;
 
 
-namespace GesusTheme { // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+#define QSTYLE_PE_FRAME_END QStyle::PE_FrameTabBarBase
+
+
+namespace GesusTheme { // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	
-	const QColor ACCENT_COLOR          = QColor(152, 116, 192);
-	const QColor FRAME_COLOR           = QColor( 84,  80,  84);
-	const QColor FRAME_HIGHLIGHT_COLOR = QColor(104, 100, 104);
-	const QColor HIGHLIGHT_BG_COLOR    = QColor( 63,  59,  63);
-	const QColor INNER_BG_COLOR        = QColor( 44,  40,  44);
-	const QColor OUTER_BG_COLOR        = QColor( 25,  21,  25);
-	const QColor TEXT_COLOR            = QColor(242, 241, 242);
-	const QColor TEXT_HIGHLIGHT_COLOR  = QColor(255, 255, 255);
+	const QRgb ACCENT_COLOR          = 0xFF9888C5;
+	const QRgb FRAME_COLOR           = 0xFF545054;
+	const QRgb FRAME_HIGHLIGHT_COLOR = 0xFF686468;
+	const QRgb HIGHLIGHT_BG_COLOR    = 0xFF3F3B3F;
 	
+	const QRgb INNER_BG_COLOR        = 0xFF2C282C;
+	const QRgb OUTER_BG_COLOR        = 0xFF191519;
+   
+	const QRgb BG_COLOR_VARIANTS[2] = { INNER_BG_COLOR,
+										OUTER_BG_COLOR };
+
+	const QRgb TEXT_COLOR            = 0xFFF2F1F2;
+	const QRgb TEXT_HIGHLIGHT_COLOR  = 0xFFFFFFFF;
+
+	const QRgb TEXT_COLOR_VARIANTS[2] = { TEXT_COLOR,
+	                                      TEXT_HIGHLIGHT_COLOR };
 	const int FRAME_THICKNESS = 1;
 
 	const QFont DEFAULT_FONT = QFont("Helvetica");
@@ -33,7 +43,7 @@ namespace GesusTheme { // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	/*  Style hints
 	 */
 	const int NO_ANIMATION = 0;
-}; // namespace GesusTheme >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+}; // namespace GesusTheme >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
 namespace GesusMetrics { // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -57,7 +67,7 @@ class GesusStyle : public QCommonStyle
 {
 	Q_OBJECT
 
-public: // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+public: // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	
 	explicit GesusStyle(void);
 	
@@ -89,89 +99,12 @@ public: // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 		return p;
 	}();
 	
-	void  drawControl(QStyle::ControlElement, const QStyleOption *, QPainter *, const QWidget * = nullptr) const;
-	void  drawItemText(QPainter *, const QRect &, int, const QPalette &, bool, const QString &, QPalette::ColorRole) const;
-	void  drawPrimitive(QStyle::PrimitiveElement, const QStyleOption *, QPainter *, const QWidget * = nullptr) const;
-	QSize sizeFromContents(QStyle::ContentsType, const QStyleOption *, const QSize &, const QWidget * = nullptr) const;
-	int   styleHint(QStyle::StyleHint, const QStyleOption * = nullptr, const QWidget * = nullptr, QStyleHintReturn * = nullptr) const;
-	QRect subElementRect(QStyle::SubElement, const QStyleOption *, const QWidget * = nullptr) const;
+	void  drawControl(QStyle::ControlElement, const QStyleOption *, QPainter *, const QWidget * = nullptr) const override;
+	void  drawItemText(QPainter *, const QRect &, int, const QPalette &, bool, const QString &, QPalette::ColorRole) const override;
+	void  drawPrimitive(QStyle::PrimitiveElement, const QStyleOption *, QPainter *, const QWidget * = nullptr) const override;
+	QSize sizeFromContents(QStyle::ContentsType, const QStyleOption *, const QSize &, const QWidget * = nullptr) const override;
+	int   styleHint(QStyle::StyleHint, const QStyleOption * = nullptr, const QWidget * = nullptr, QStyleHintReturn * = nullptr) const override;
+	QRect subElementRect(QStyle::SubElement, const QStyleOption *, const QWidget * = nullptr) const override;
 	
 private: // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-	
-#define QSTYLE_CE_MAX       QStyle::CE_ShapedFrame + 1
-#define QSTYLE_CT_MAX       QStyle::CT_ItemViewItem + 1
-#define QSTYLE_PE_MAX       QStyle::PE_IndicatorTabTearRight + 1
-#define QSTYLE_SE_MAX       QStyle::SE_PushButtonBevel + 1
-#define QSTYLE_PE_FRAME_END QStyle::PE_FrameTabBarBase
-	
-#define DRAW_SIGNATURE  const QStyleOption *, QPainter *, const QWidget *
-#define RECT_SIGNATURE  const QRect &, const QStyleOption *, const QWidget *
-#define SIZE_SIGNATURE  const QStyleOption *, const QSize &, const QWidget *
-	
-	typedef function<void(DRAW_SIGNATURE)>  DrawFunction;
-	typedef function<QRect(RECT_SIGNATURE)> RectFunction;
-	typedef function<QSize(SIZE_SIGNATURE)> SizeFunction;
-
-	static void gesus_ce_menu_bar_empty_area(DRAW_SIGNATURE);
-	static void gesus_ce_menu_item(DRAW_SIGNATURE);
-	static void gesus_ce_tab_bar_shape(DRAW_SIGNATURE);
-	
-	array<DrawFunction, QSTYLE_CE_MAX> customDrawControlFunctions = []() {
-		array<DrawFunction, QSTYLE_CE_MAX> a{};
-		
-		a[QStyle::CE_MenuBarEmptyArea] = gesus_ce_menu_bar_empty_area;
-
-		a[QStyle::CE_MenuItem] = gesus_ce_menu_item;
-
-		a[QStyle::CE_TabBarTabShape] = gesus_ce_tab_bar_shape;
-		
-		return a;
-	}();
-
-	static void gesus_pe_frame(DRAW_SIGNATURE);
-	static void gesus_pe_frame_focus_rect(DRAW_SIGNATURE);
-	static void gesus_pe_frame_not_skewed(DRAW_SIGNATURE);
-	static void gesus_pe_panel_menu_bar(DRAW_SIGNATURE);
-	
-	array<DrawFunction, QSTYLE_PE_MAX> customDrawPrimitiveFunctions = []() {
-		array<DrawFunction, QSTYLE_PE_MAX> a{};
-
-		for (int i = 0; i <= QSTYLE_PE_FRAME_END; a[i++] = gesus_pe_frame);
-		
-		a[QStyle::PE_FrameFocusRect] = gesus_pe_frame_focus_rect;
-
-		a[QStyle::PE_FrameMenu] = gesus_pe_frame_not_skewed;
-		
-		a[QStyle::PE_PanelMenuBar] = gesus_pe_panel_menu_bar;
-		
-		return a;
-	}();
-
-	static QSize gesus_ct_menu_bar_item(SIZE_SIGNATURE);
-	static QSize gesus_ct_menu_item(SIZE_SIGNATURE);
-	static QSize gesus_ct_tab_bar_tab(SIZE_SIGNATURE);
-	
-	array<SizeFunction, QSTYLE_CT_MAX> customContentSizeFunctions = []() {
-		array<SizeFunction, QSTYLE_CT_MAX> a{};
-
-		a[QStyle::CT_MenuBarItem] = gesus_ct_menu_bar_item;
-
-		// a[QStyle::CT_MenuItem] = gesus_ct_menu_item;
-
-		a[QStyle::CT_TabBarTab] = gesus_ct_tab_bar_tab;
-		
-		return a;
-	}();
-
-	static QRect gesus_se_default_text(RECT_SIGNATURE);
-	
-	array<RectFunction, QSTYLE_SE_MAX> customSubElementRectFunctions = []() {
-		array<RectFunction, QSTYLE_SE_MAX> a{};
-
-		a[QStyle::SE_DockWidgetTitleBarText] = gesus_se_default_text;
-		
-	    a[QStyle::SE_TabBarTabText] = gesus_se_default_text;
-		
-		return a;
-	}();
 };

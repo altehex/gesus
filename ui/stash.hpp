@@ -4,10 +4,12 @@
 #include "../genesis/genesis_tile.hpp"
 
 #include <QDir>
+#include <QDockWidget>
+#include <QGridLayout>
 #include <QList>
 #include <QPushButton>
 #include <QString>
-#include <QTableView>
+#include <QWidget>
 
 #include <list>
 using std::list;
@@ -24,6 +26,8 @@ class TileItem : public QPushButton
 public: // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 	TileItem(const QString &);
+
+	const Tile & getTile(void) const { return tile; }
 	
 signals: // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -35,24 +39,25 @@ private: // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 };
 
 
-class TileStash : public QTableView
+class TileStash : public QWidget
 {
 	Q_OBJECT
 
 public: // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-	explicit TileStash(const QWidget * parent = nullptr);
+	explicit TileStash(QWidget * = nullptr);
 
-	const QDir & getTileDir(void) const { return tileDir; }
+	const QDir & get_tile_dir(void) const { return tileDir; }
 	
 private: // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 	static inline QDir tileDir = QDir(TILE_STASH_DEFAULT_DIR);
 	
-	list<TileItem *> tiles;
+	QGridLayout       tileItemGrid;
+	list<TileItem *>  tileItems;
 	
-	void load_tiles_from_directory(const QDir & dir = tileDir);
-	void setup_table(void);
+	void load_tiles_from_directory(const QDir & = tileDir);
+	void setup_grid(void);
 															  
 private slots: // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 

@@ -12,8 +12,8 @@ set(
 )
 
 set(
-  CMAKE_CXX_FLAGS_RELEASE_INIT "-Wall -O3 -MP"
-  CMAKE_CXX_FLAGS_DEBUG_INIT   "-Wall -MP -g -pg"
+  CMAKE_CXX_FLAGS_RELEASE_INIT "-Wall -O3"
+  CMAKE_CXX_FLAGS_DEBUG_INIT   "-Wall -g -pg"
 )
 
 set(CMAKE_AUTORCC ON)

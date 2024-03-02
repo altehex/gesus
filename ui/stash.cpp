@@ -4,9 +4,12 @@
 #include "style.hpp"
 
 #include <QDir>
+#include <QDockWidget>
 #include <QFileInfo>
 #include <QIcon>
+#include <QMouseEvent>
 #include <QString>
+#include <QWidget>
 
 
 TileItem::
@@ -14,21 +17,17 @@ TileItem(const QString & tilePath)
 	: tile(tilePath)
 	
 {
-	// QIcon * tileIcon;
-
-	// tileIcon = new QIcon (tileImage);
-	
-	// this->setIcon(&tileIcon);
-	// this->setIconSize();
+	setIconSize(QSize(48, 48));
 }
 
 
 TileStash::
-TileStash(const QWidget * parent)
-{
+TileStash(QWidget * parent)
+	: QWidget(parent)
+{	
 	load_tiles_from_directory();
 
-	setup_table();
+	setup_grid();
 	
 	setPalette(GesusStyle::palette);
 }
@@ -42,25 +41,31 @@ load_tiles_from_directory(const QDir & dir)
 						 		             QDir::Writable     |
 								             QDir::Files        |
 								             QDir::CaseSensitive;
-
 	QFileInfoList  tileFiles;
 	TileItem *     tileItem;
 
 	tileFiles = dir.entryInfoList(extensions, filters);
 	for (const QFileInfo & tileFile : tileFiles) {
-		if (!tileFile.exists())
-			break;
-		
 		tileItem = new TileItem(tileFile.filePath());
-	    tiles.push_back(tileItem);
+	    tileItems.push_back(tileItem);
 	}
 }
 
 
 void TileStash::
-setup_table()
+setup_grid()
 {
+	QIcon    tileItemIcon;
+	QPixmap  tileItemIconPixmap;
 	
+	for (const auto & tileItem : tileItems) {
+		tileItemIconPixmap = tileItem->getTile().scaled(48, 48);
+		tileItemIcon.addPixmap(tileItemIconPixmap);
+		tileItem->setIcon(tileItemIcon);
+		tileItemGrid.addWidget(tileItem);
+	}
+
+	setLayout(&tileItemGrid);
 }
 
 

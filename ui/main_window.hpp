@@ -7,8 +7,9 @@
 #include "sprite_editor.hpp"
 #include "stash.hpp"
 
-#include "settings.hpp"
 #include "about.hpp"
+#include "darken_overlay.hpp"
+#include "settings.hpp"
 
 #include <QAction>
 #include <QApplication>
@@ -29,26 +30,30 @@ class GesusMainWindow : public QMainWindow
 public: // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	
 	GesusMainWindow(int, char * []);
-
+								   
 private slots: // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 	void slot_close_selected_tab(int);
 	void slot_select_adjacent_tab(const QKeySequence &);
+	void slot_show_stash(void);
 	void slot_toggle_fullscreen(void);
 	
 private: // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-	QTabWidget *    gesusEditorTabs;
+	QTabWidget   gesusEditorTabs    = QTabWidget();
+	QDockWidget  gesusTileStashDock = QDockWidget(TILE_STASH_DOCK_NAME, this);
 	
-	SpriteEditor    gesusSpriteEditor;
-	TileEditor      gesusTileEditor;
-	TileStash       gesusTileStash;
-	PaletteEditor   gesusPaletteEditor;
-	PlaneEditor     gesusPlaneEditor;
+	SpriteEditor   gesusSpriteEditor;
+	TileEditor     gesusTileEditor;
+	TileStash      gesusTileStash;
+	PaletteEditor  gesusPaletteEditor;
+	PlaneEditor    gesusPlaneEditor;
 	
-	GesusSettings   gesusSettings;
-	GesusAbout      gesusAbout;
+	GesusSettings  gesusSettings;
+	GesusAbout     gesusAbout;
 
+	DarkenOverlay  darkenOverlay = DarkenOverlay(&gesusTileStashDock, this);
+	
 	/*  Initialization functions
 	 */
 	void create_missing_dirs(void);
@@ -61,6 +66,7 @@ private: // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	/*  Menus
 	 */
 #define FILE_MENU_TITLE  "File"
+	
 	QMenu gesusFileMenu;
 
 	QAction actShowAbout       = QAction("About", this);
@@ -74,5 +80,6 @@ private: // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	QShortcut scFullscreen      = QShortcut(Qt::Key_F11,               this);
 	QShortcut scLeftTab         = QShortcut(Qt::SHIFT | Qt::Key_Left,  this);
 	QShortcut scRightTab        = QShortcut(Qt::SHIFT | Qt::Key_Right, this);
+	QShortcut scShowStash       = QShortcut(Qt::CTRL | Qt::Key_T,      this);
 	
 }; // class GesusMainWindow

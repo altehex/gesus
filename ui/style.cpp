@@ -22,24 +22,23 @@ GesusStyle()
 
 
 void GesusStyle::
-drawItemText(       QPainter *          painter,
-			  const QRect &             rect,
-			        int                 flags,
-			  const QPalette &          palette,
-			 		bool                enabled,
-			  const QString &           text,
-			        QPalette::ColorRole textRole) const
+drawItemText(       QPainter *           painter,
+			  const QRect &              rect,
+			        int                  flags,
+			  const QPalette &           palette,
+			 		bool                 enabled,
+			  const QString &            text,
+			        QPalette::ColorRole  textRole) const
 {
 	QColor textColor;
 	QRect  textRect;
 
-	textColor = enabled ? GesusTheme::TEXT_HIGHLIGHT_COLOR :
-		                  GesusTheme::TEXT_COLOR;
+	textColor = GesusTheme::TEXT_COLOR_VARIANTS[enabled];
 	textRect  = rect.adjusted(GesusMetrics::TEXT_MARGIN_DEFAULT_H,
 			 				  GesusMetrics::TEXT_MARGIN_DEFAULT_V, 0, 0);
 	
-	painter->setPen  (QPen(textColor));
-	painter->setFont (GesusTheme::DEFAULT_FONT);
+	painter->setPen   (QPen(textColor));
+	painter->setFont  (GesusTheme::DEFAULT_FONT);
 	
 	painter->drawText(textRect, text);
 	
@@ -47,103 +46,79 @@ drawItemText(       QPainter *          painter,
 
 
 void GesusStyle::
-drawControl(      QStyle::ControlElement controlElement,
-			const QStyleOption *         styleOption,
-			      QPainter *             painter,
-			const QWidget *              widget) const
-{
-	DrawFunction draw_function = customDrawControlFunctions[controlElement];
-		
-	if (draw_function) [[unlikely]]
-		draw_function(styleOption, painter, widget);
-	else
-		QCommonStyle::drawControl(controlElement, styleOption, painter, widget);
-}
-
-
-void GesusStyle::
-gesus_ce_menu_bar_empty_area(const QStyleOption * styleOption,
-					               QPainter *     painter,
-					         const QWidget *      widget)
-{
-	painter->fillRect(styleOption->rect, GesusTheme::OUTER_BG_COLOR);
-}
-
-
-void GesusStyle::
-gesus_ce_menu_item(const QStyleOption * styleOption,
-				         QPainter *     painter,
-				   const QWidget *      widget)
+drawControl(      QStyle::ControlElement  controlElement,
+			const QStyleOption *          styleOption,
+			      QPainter *              painter,
+			const QWidget *               widget) const
 {
 	using namespace GesusMetrics;
-	
-	const QStyleOptionMenuItem * menuItemOption = qstyleoption_cast<const QStyleOptionMenuItem *>(styleOption);
-	
-	int    itemTextFlags;
-	QRect  itemTextRect;
-	QColor itemTextColor, itemBaseColor;
 
-	bool isSelected;
+	bool isSelected = styleOption->state & State_Selected;
 
-	itemTextFlags = Qt::AlignLeft        |
-		            Qt::AlignTop         |
-		            Qt::TextShowMnemonic |
-                    Qt::TextDontClip     |
-		            Qt::TextSingleLine;
-	itemTextRect  = menuItemOption->rect.adjusted(TEXT_MARGIN_DEFAULT_H + MENU_ITEM_MARGIN_H,
-												  TEXT_MARGIN_DEFAULT_V + MENU_ITEM_MARGIN_V,
-												  -TEXT_MARGIN_DEFAULT_H - MENU_ITEM_MARGIN_H,
-												  -TEXT_MARGIN_DEFAULT_V - MENU_ITEM_MARGIN_V);
+	switch (controlElement) { // ============================================================
+		
+		case CE_MenuBarEmptyArea: {
+			painter->fillRect(styleOption->rect, GesusTheme::OUTER_BG_COLOR);
 
-	isSelected = menuItemOption->state & State_Selected;
+			return;
+		} // case CE_MenuItem: -------------------------------------------------------------
+			
+		case CE_MenuItem: {
+			const QStyleOptionMenuItem * menuItemOption = qstyleoption_cast<const QStyleOptionMenuItem *>(styleOption);
 
-	if (!isSelected) [[likely]] {
-		itemBaseColor = GesusTheme::OUTER_BG_COLOR;
-		itemTextColor = GesusTheme::TEXT_COLOR;
-	}
-	else {
-		itemBaseColor = GesusTheme::INNER_BG_COLOR;
-		itemTextColor = GesusTheme::TEXT_HIGHLIGHT_COLOR;
-	}
+			int     itemTextFlags;
+			QRect   itemTextRect;
+			QColor  itemTextColor, itemBaseColor;
 
-	painter->fillRect(menuItemOption->rect, itemBaseColor);
-	
-	painter->setPen  (QPen(itemTextColor));
-	painter->setFont (GesusTheme::DEFAULT_FONT);
-	
-	painter->drawText(itemTextRect, itemTextFlags, menuItemOption->text);
-}
+			itemTextFlags = Qt::AlignLeft        |
+							Qt::AlignTop         |
+							Qt::TextShowMnemonic |
+							Qt::TextDontClip     |
+							Qt::TextSingleLine;
+			itemTextRect  = menuItemOption->rect.adjusted(TEXT_MARGIN_DEFAULT_H + MENU_ITEM_MARGIN_H,
+														  TEXT_MARGIN_DEFAULT_V + MENU_ITEM_MARGIN_V,
+														  -TEXT_MARGIN_DEFAULT_H - MENU_ITEM_MARGIN_H,
+														  -TEXT_MARGIN_DEFAULT_V - MENU_ITEM_MARGIN_V);
 
+			itemBaseColor = GesusTheme::BG_COLOR_VARIANTS[isSelected];
+			itemTextColor = GesusTheme::TEXT_COLOR_VARIANTS[isSelected];
 
-void GesusStyle::
-gesus_ce_tab_bar_shape(const QStyleOption * styleOption,
-					         QPainter *     painter,
-					   const QWidget *      widget)
-{
-	const QStyleOptionTab * tabOption = qstyleoption_cast<const QStyleOptionTab *>(styleOption);
+			painter->fillRect(menuItemOption->rect, itemBaseColor);
 
-	QColor tabColor;
-	QRect  tabRect;
+			painter->setPen   (QPen(itemTextColor));
+			painter->setFont  (GesusTheme::DEFAULT_FONT);
 
-	bool isSelected;
+			painter->drawText(itemTextRect, itemTextFlags, menuItemOption->text);
 
-    tabRect = tabOption->rect;
+			return;
+		} // case CE_MenuItem: -------------------------------------------------------------
+			
+		case CE_TabBarTabShape: {
+			const QStyleOptionTab * tabOption = qstyleoption_cast<const QStyleOptionTab *>(styleOption);
 
-	isSelected = tabOption->state & State_Selected;
-	
-	if (!isSelected) [[likely]] {
-		tabColor = GesusTheme::OUTER_BG_COLOR;
-		tabRect  = tabRect.adjusted(0, 0, 0, -1);
-	}
-	else {
-		tabColor = GesusTheme::INNER_BG_COLOR;
-		tabRect  = tabRect.adjusted(1, 1, -3, 0);
-	}
-	
-	painter->fillRect(tabRect, tabColor);
-	
-	if (isSelected)
-		Draw::draw_outline_skewed_tab(painter, tabRect);
+			QColor  tabColor;
+			QRect   tabRect;
+
+			tabRect  = tabOption->rect;
+			tabColor = GesusTheme::BG_COLOR_VARIANTS[!isSelected];
+			
+			if (!isSelected) [[likely]]
+				tabRect = tabRect.adjusted(0, 0, 0, -1);
+			else 
+				tabRect = tabRect.adjusted(1, 1, -3, 0);
+
+			painter->fillRect(tabRect, tabColor);
+
+			if (isSelected)
+				Draw::draw_outline_skewed_tab(painter, tabRect);
+
+			return;
+		} // case CE_TabBarTabShape: -------------------------------------------------------
+			
+		default:
+			QCommonStyle::drawControl(controlElement, styleOption, painter, widget);
+
+	} // switch (controlElement) ============================================================
 }
 
 
@@ -152,128 +127,67 @@ drawPrimitive(      QStyle::PrimitiveElement  primitiveElement,
 			  const QStyleOption *            styleOption,
 			        QPainter *                painter,
 			  const QWidget *                 widget) const
-{
-	DrawFunction draw_function = customDrawPrimitiveFunctions[primitiveElement];
-		
-	if (draw_function)
-		draw_function(styleOption, painter, widget);
-	else
-		QCommonStyle::drawPrimitive(primitiveElement, styleOption, painter, widget);
-}
-
-
-//  0. Generic frame
-void GesusStyle::
-gesus_pe_frame(const QStyleOption *  styleOption,
-			         QPainter *      painter,
-			   const QWidget *       widget)
-{
-	Draw::draw_outline_skewed(painter, styleOption->rect);
-}
-
-
-//  0. Generic frame
-void GesusStyle::
-gesus_pe_frame_not_skewed(const QStyleOption *  styleOption,
-			                    QPainter *      painter,
-			              const QWidget *       widget)
-{
-	Draw::draw_outline(painter, styleOption->rect);
-}
-
-
-//  3. Generic focus indicator
-void GesusStyle::
-gesus_pe_frame_focus_rect(const QStyleOption *  styleOption,
-								QPainter *      painter,
-						  const QWidget *       widget)
-{
-	/* Draw nothing */
-}
-
-
-void GesusStyle::
-gesus_pe_panel_menu_bar(const QStyleOption *  styleOption,
-					    	  QPainter *      painter,
-    					const QWidget *       widget)
-{
-	QRect panelRect = styleOption->rect.adjusted(1, 1, -1, -1);
-	painter->fillRect(panelRect, GesusTheme::OUTER_BG_COLOR);
+{	
+	switch (primitiveElement) { 
+		case PE_FrameMenu:
+			Draw::draw_outline(painter, styleOption->rect);
+		case PE_FrameFocusRect:
+			return;
+			
+		case PE_PanelMenuBar: {
+			QRect panelRect = styleOption->rect.adjusted(1, 1, -1, -1);
+			painter->fillRect(panelRect, GesusTheme::BG_COLOR_VARIANTS[0]);
+			return;
+		}
+			
+		default:
+			if (primitiveElement <= QSTYLE_PE_FRAME_END)
+				Draw::draw_outline_skewed(painter, styleOption->rect);
+			else [[likely]]
+				QCommonStyle::drawPrimitive(primitiveElement, styleOption, painter, widget);
+	}
 }
 
 
 QSize GesusStyle::
-sizeFromContents(QStyle::ContentsType contentsType,
-				 const QStyleOption * styleOption,
-				 const QSize &        contentsSize,
-				 const QWidget *      widget) const
-{
-	SizeFunction size_function = customContentSizeFunctions[contentsType];
-		
-	if (size_function) [[unlikely]]
-		return size_function(styleOption, contentsSize, widget);
-
-	return QCommonStyle::sizeFromContents(contentsType, styleOption, contentsSize, widget);
-}
-
-
-QSize GesusStyle::
-gesus_ct_menu_bar_item(const QStyleOption * styleOption,
-				       const QSize &        contentsSize,
-				       const QWidget *      widget)
+sizeFromContents(QStyle::ContentsType  contentsType,
+				 const QStyleOption *  styleOption,
+				 const QSize &         contentsSize,
+				 const QWidget *       widget) const
 {
 	int width, height;
 	int fontHeight;
 	
 	fontHeight = styleOption->fontMetrics.height();
-	
-	width  = qMax(contentsSize.width() + 2 * GesusMetrics::MENU_BAR_ITEM_MARGIN_H,
-				  fontHeight * 2);
-	height = fontHeight + 2 * GesusMetrics::MENU_BAR_ITEM_MARGIN_V;
-	
-	return QSize(width, height);
-}
 
+	switch (contentsType) {
+		case CT_MenuBarItem: {
+			width  = qMax(contentsSize.width() + 2 * GesusMetrics::MENU_BAR_ITEM_MARGIN_H, fontHeight * 2);
+			height = fontHeight + 2 * GesusMetrics::MENU_BAR_ITEM_MARGIN_V;
 
-QSize GesusStyle::
-gesus_ct_menu_item(const QStyleOption * styleOption,
-				   const QSize &        contentsSize,
-			       const QWidget *      widget)
-{
-	// int width, height;
-	// int fontMetrics;
-	
-	// width  = ;
-	// height = contentsSize.height() + ;
-	
-	// return QSize(width, height);
-}
+			return QSize(width, height);
+		}
 
+		case CT_TabBarTab: {
+			width  = contentsSize.width() + 2 * GesusMetrics::TAB_BAR_TAB_MARGIN_H;
+			height = fontHeight + 2 * GesusMetrics::TAB_BAR_TAB_MARGIN_V * 2;
 
-QSize GesusStyle::
-gesus_ct_tab_bar_tab(const QStyleOption * styleOption,
-				     const QSize &        contentsSize,
-			         const QWidget *      widget)
-{
-	int width, height;
-	int fontHeight;
-
-	fontHeight = styleOption->fontMetrics.height();
-	
-	width  = contentsSize.width() + 2 * GesusMetrics::TAB_BAR_TAB_MARGIN_H;
-	height = fontHeight + 2 * GesusMetrics::TAB_BAR_TAB_MARGIN_V * 2;
-	
-	return QSize(width, height);
+			return QSize(width, height);
+		}
+			
+		default: 
+			return QCommonStyle::sizeFromContents(contentsType, styleOption, contentsSize, widget);
+	}
 }
 
 
 int GesusStyle::
-styleHint(      QStyle::StyleHint  styleHint,
-		  const QStyleOption *     styleOption,
-		  const QWidget *          widget,
-				QStyleHintReturn * returnData) const
+styleHint(      QStyle::StyleHint   styleHint,
+		  const QStyleOption *      styleOption,
+		  const QWidget *           widget,
+				QStyleHintReturn *  returnData) const
 {
-	if (styleHint == QStyle::SH_Widget_Animation_Duration) [[unlikely]]
+	if (styleHint == QStyle::SH_Widget_Animation_Duration)
 		return GesusTheme::NO_ANIMATION;
 
 	return QCommonStyle::styleHint(styleHint, styleOption, widget, returnData);
@@ -281,24 +195,18 @@ styleHint(      QStyle::StyleHint  styleHint,
 
 
 QRect GesusStyle::
-subElementRect(      QStyle::SubElement subElement,
-			   const QStyleOption *     styleOption,
-			   const QWidget *          widget) const
+subElementRect(      QStyle::SubElement  subElement,
+			   const QStyleOption *      styleOption,
+			   const QWidget *           widget) const
 {
-	RectFunction rect_function = customSubElementRectFunctions[subElement];
-	QRect        rect          = QCommonStyle::subElementRect(subElement, styleOption, widget);
-	
-	if (rect_function) [[unlikely]]
-		return rect_function(rect, styleOption, widget);
-	
-	return rect;
-}
+	QRect rect = QCommonStyle::subElementRect(subElement, styleOption, widget);
 
+	switch (subElement) {
+		case SE_DockWidgetTitleBarText:
+		case SE_TabBarTabText:
+			return rect.adjusted(GesusMetrics::TEXT_MARGIN_DEFAULT_H, GesusMetrics::TEXT_MARGIN_DEFAULT_V, 0, 0);
 
-QRect GesusStyle::
-gesus_se_default_text(const QRect &        rect,
-					  const QStyleOption * styleOption,
-			          const QWidget *      widget)
-{
-	return rect.adjusted(GesusMetrics::TEXT_MARGIN_DEFAULT_H, GesusMetrics::TEXT_MARGIN_DEFAULT_V, 0, 0);
+		default:
+			return rect;
+	}	
 }

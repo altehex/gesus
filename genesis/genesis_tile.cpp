@@ -7,6 +7,6 @@
 
 Tile::
 Tile(const QString & path)
-	: QImage(path)
+	: QPixmap(path)
 {
 }

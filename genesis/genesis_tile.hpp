@@ -3,12 +3,13 @@
 
 #include "genesis_color.hpp"
 
-#include <QImage>
+#include <QPixmap>
 #include <QString>
 
 
-class Tile : public QImage
+class Tile : public QPixmap
 {
 public:
+	Tile(void) {}
 	Tile(const QString &);
 };
